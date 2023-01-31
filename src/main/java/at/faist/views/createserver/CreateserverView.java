@@ -1,128 +1,86 @@
 package at.faist.views.createserver;
 
-import at.faist.data.entity.SamplePerson;
-import at.faist.data.service.SamplePersonService;
+import at.faist.data.model.factoria.FactoriaInstanceModel;
+import at.faist.data.service.CurrentUserService;
+import at.faist.data.service.FactorioInstancesService;
+import at.faist.data.service.YmlCreationService;
+import at.faist.views.AbstractValidationView;
 import at.faist.views.MainLayout;
+import at.faist.views.createserver.pmo.CreateInstancePmo;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.customfield.CustomField;
-import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.RouteParam;
+import com.vaadin.flow.router.RouteParameters;
+import org.linkki.core.binding.validation.ValidationService;
+import org.linkki.core.binding.validation.message.Message;
+import org.linkki.core.binding.validation.message.MessageList;
+import org.linkki.core.binding.validation.message.Severity;
+import org.linkki.core.ui.creation.VaadinUiCreator;
 
+import javax.annotation.security.PermitAll;
+import java.util.function.Supplier;
+
+@PermitAll
 @PageTitle("Create server")
-@Route(value = "create/server", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+@Route(value = "server/create", layout = MainLayout.class)
 @Uses(Icon.class)
-public class CreateserverView extends Div {
+public class CreateserverView extends AbstractValidationView {
+    private final FactorioInstancesService factorioInstancesService;
+    private final CurrentUserService currentUserService;
+    private final YmlCreationService ymlCreationService;
+    private FactoriaInstanceModel store;
 
-    private TextField firstName = new TextField("First name");
-    private TextField lastName = new TextField("Last name");
-    private EmailField email = new EmailField("Email address");
-    private DatePicker dateOfBirth = new DatePicker("Birthday");
-    private PhoneNumberField phone = new PhoneNumberField("Phone number");
-    private TextField occupation = new TextField("Occupation");
 
-    private Button cancel = new Button("Cancel");
-    private Button save = new Button("Save");
-
-    private Binder<SamplePerson> binder = new Binder<>(SamplePerson.class);
-
-    public CreateserverView(SamplePersonService personService) {
+    public CreateserverView(FactorioInstancesService factorioInstancesService, CurrentUserService currentUserService, YmlCreationService ymlCreationService) {
+        this.factorioInstancesService = factorioInstancesService;
+        this.currentUserService = currentUserService;
+        this.ymlCreationService = ymlCreationService;
         addClassName("createserver-view");
-
-        add(createTitle());
-        add(createFormLayout());
-        add(createButtonLayout());
-
-        binder.bindInstanceFields(this);
-        clearForm();
-
-        cancel.addClickListener(e -> clearForm());
-        save.addClickListener(e -> {
-            personService.update(binder.getBean());
-            Notification.show(binder.getBean().getClass().getSimpleName() + " details stored.");
-            clearForm();
-        });
+        getDefaultBindingManager(new CreateInstanceValidationService(() -> getInstanceModel(), factorioInstancesService)).addUiUpdateObserver(getBindingContext());
+        Component section = VaadinUiCreator.createComponent(new CreateInstancePmo(() -> getInstanceModel(), this::saveInstance), getBindingContext());
+        add(section);
     }
 
-    private void clearForm() {
-        binder.setBean(new SamplePerson());
+    private void saveInstance(FactoriaInstanceModel data) {
+        if (getValidationService().getValidationMessages().isEmpty()) {
+            factorioInstancesService.createInstance(currentUserService.getCurrentUser(), data.getName());
+            ymlCreationService.createDockerCompose(data.getName(), currentUserService.getCurrentUser());
+            UI.getCurrent().navigate(CreateserverSettingsView.class, new RouteParameters(new RouteParam("instancename", data.getName())));
+            store = null;
+        }
+        if (factorioInstancesService.userInstanceExists(currentUserService.getCurrentUser(), data.getName())) {
+            UI.getCurrent().navigate(CreateserverSettingsView.class, new RouteParameters(new RouteParam("instancename", data.getName())));
+            store = null;
+        }
     }
 
-    private Component createTitle() {
-        return new H3("Personal information");
+    private FactoriaInstanceModel getInstanceModel() {
+        if (store == null) {
+            return store = new FactoriaInstanceModel();
+        }
+        return store;
     }
 
-    private Component createFormLayout() {
-        FormLayout formLayout = new FormLayout();
-        email.setErrorMessage("Please enter a valid email address");
-        formLayout.add(firstName, lastName, dateOfBirth, phone, email, occupation);
-        return formLayout;
-    }
 
-    private Component createButtonLayout() {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.addClassName("button-layout");
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save);
-        buttonLayout.add(cancel);
-        return buttonLayout;
-    }
+    private static class CreateInstanceValidationService implements ValidationService {
+        private final Supplier<FactoriaInstanceModel> modelSupplier;
+        private final FactorioInstancesService factorioInstancesService;
 
-    private static class PhoneNumberField extends CustomField<String> {
-        private ComboBox<String> countryCode = new ComboBox<>();
-        private TextField number = new TextField();
-
-        public PhoneNumberField(String label) {
-            setLabel(label);
-            countryCode.setWidth("120px");
-            countryCode.setPlaceholder("Country");
-            countryCode.setAllowedCharPattern("[\\+\\d]");
-            countryCode.setItems("+354", "+91", "+62", "+98", "+964", "+353", "+44", "+972", "+39", "+225");
-            countryCode.addCustomValueSetListener(e -> countryCode.setValue(e.getDetail()));
-            number.setAllowedCharPattern("\\d");
-            HorizontalLayout layout = new HorizontalLayout(countryCode, number);
-            layout.setFlexGrow(1.0, number);
-            add(layout);
+        public CreateInstanceValidationService(Supplier<FactoriaInstanceModel> modelSupplier, FactorioInstancesService factorioInstancesService) {
+            this.modelSupplier = modelSupplier;
+            this.factorioInstancesService = factorioInstancesService;
         }
 
         @Override
-        protected String generateModelValue() {
-            if (countryCode.getValue() != null && number.getValue() != null) {
-                String s = countryCode.getValue() + " " + number.getValue();
-                return s;
+        public MessageList getValidationMessages() {
+            if (factorioInstancesService.instanceExists(modelSupplier.get().getName())) {
+                return new MessageList(Message.builder("Der Name existiert bereits", Severity.ERROR).invalidObjectWithProperties(modelSupplier.get(), "instanceName").create());
             }
-            return "";
-        }
-
-        @Override
-        protected void setPresentationValue(String phoneNumber) {
-            String[] parts = phoneNumber != null ? phoneNumber.split(" ", 2) : new String[0];
-            if (parts.length == 1) {
-                countryCode.clear();
-                number.setValue(parts[0]);
-            } else if (parts.length == 2) {
-                countryCode.setValue(parts[0]);
-                number.setValue(parts[1]);
-            } else {
-                countryCode.clear();
-                number.clear();
-            }
+            return new MessageList();
         }
     }
-
 }

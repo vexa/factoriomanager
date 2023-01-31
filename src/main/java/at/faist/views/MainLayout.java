@@ -3,14 +3,18 @@ package at.faist.views;
 
 import at.faist.components.appnav.AppNav;
 import at.faist.components.appnav.AppNavItem;
+import at.faist.components.appnav.SecurityService;
 import at.faist.views.createserver.CreateserverView;
-import at.faist.views.serverliste.ServerListeView;
+import at.faist.views.createserver.ServerListeView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -20,9 +24,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
  */
 public class MainLayout extends AppLayout {
 
+    private final SecurityService securityService;
     private H2 viewTitle;
 
-    public MainLayout() {
+    public MainLayout(SecurityService securityService) {
+        this.securityService = securityService;
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
@@ -31,11 +37,14 @@ public class MainLayout extends AppLayout {
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
+        Button logout = new Button("Log out", e -> securityService.logout());
 
         viewTitle = new H2();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-
-        addToNavbar(true, toggle, viewTitle);
+        HorizontalLayout header = new HorizontalLayout(toggle, viewTitle, logout);
+        header.setWidthFull();
+        header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        addToNavbar(true, header);
     }
 
     private void addDrawerContent() {
@@ -54,8 +63,7 @@ public class MainLayout extends AppLayout {
         AppNav nav = new AppNav();
 
         nav.addItem(new AppNavItem("Create server", CreateserverView.class, "la la-server"));
-        nav.addItem(new AppNavItem("Server Liste", ServerListeView.class, "la la-columns"));
-
+        nav.addItem(new AppNavItem("Configure server", ServerListeView.class, "la la-server"));
         return nav;
     }
 
