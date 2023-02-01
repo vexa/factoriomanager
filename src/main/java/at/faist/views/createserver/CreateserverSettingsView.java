@@ -46,7 +46,7 @@ public class CreateserverSettingsView extends AbstractServerView {
         add(modPmo);
         modPmo.renderMod(instanceName);
         modPmo.renderUpload(instanceName);
-
+        add(new H1("Server Settings Json "));
         add(new ServerSettingsJsonEditor(factorioInstancesService, currentUserService.getCurrentUser(), instanceName));
     }
 

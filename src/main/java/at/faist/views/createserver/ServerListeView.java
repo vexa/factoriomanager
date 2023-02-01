@@ -57,13 +57,20 @@ public class ServerListeView extends VerticalLayout implements BeforeEnterObserv
 
     private void delete(FactoriaServerModel model) {
         if (dockerComposeService.isRunning(model.getName())) {
-            dockerComposeService.delete(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
-            // dockerComposeService.down(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
+            try {
+                dockerComposeService.down(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
+            } catch (Exception e) {
+            }
+            try {
+                dockerComposeService.delete(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
+            } catch (Exception e) {
+            }
         }
         try {
             factorioInstancesService.deleteInstance(model.getUser(), model.getName());
             serverGrid.setItems(getItems());
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

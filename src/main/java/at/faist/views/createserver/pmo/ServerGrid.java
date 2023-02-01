@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 public class ServerGrid extends Grid<FactoriaServerModel> {
     public ServerGrid(Consumer<FactoriaServerModel> startStopAction, Consumer<FactoriaServerModel> editAction, Consumer<FactoriaServerModel> deleteAction) {
         addColumn(FactoriaServerModel::getName).setHeader("Server Name");
-        addColumn(FactoriaServerModel::getPorts).setHeader("Ports");
+        addColumn(FactoriaServerModel::getPorts).setHeader("Ports").setWidth("320px");
         addColumn(this::isRunning).setHeader("Status");
         addColumn(new ComponentRenderer<>(server -> {
             if (server.isRunning()) {
