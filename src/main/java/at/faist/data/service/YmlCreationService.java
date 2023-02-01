@@ -1,8 +1,6 @@
 package at.faist.data.service;
 
-import at.faist.data.model.docker.ComposeService;
-import at.faist.data.model.docker.ComposeServices;
-import at.faist.data.model.docker.DockerCompose;
+import at.faist.data.model.docker.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +56,11 @@ public class YmlCreationService {
         }
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     public DockerCompose getDefaultFacotriaCompose() {
         return DockerCompose.builder()
                 .version("3.3")
@@ -73,6 +76,14 @@ public class YmlCreationService {
                                                 .volumes(List.of("/opt/factorio:/factorio"))
                                                 .build())
                                 .build())
+                .networks(ComposeNetworks.builder().def(
+                                ComposeNetwork.builder().driver("bridge")
+                                        .ipam(NetworkIpam.builder()
+                                                .driver("default")
+                                                .config(List.of("- subnet: 172.27.0.0/16"))
+                                                .build())
+                                        .build())
+                        .build())
                 .build();
     }
 }

@@ -5,10 +5,8 @@ import at.faist.data.service.FactorioInstancesService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 public class ServerSettingsJsonEditor extends VerticalLayout {
@@ -43,9 +41,9 @@ public class ServerSettingsJsonEditor extends VerticalLayout {
 
     private String loadDefaultSettings() {
         try {
-            var res = getClass().getClassLoader().getResource("default-server-settings.json");
-            File f = new File(res.toURI());
-            return FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+            var res = getClass().getClassLoader().getResourceAsStream("default-server-settings.json");
+            String text = new String(res.readAllBytes(), StandardCharsets.UTF_8);
+            return text;
         } catch (Exception e) {
 
         }
