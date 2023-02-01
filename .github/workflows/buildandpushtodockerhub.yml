@@ -2,7 +2,9 @@ name: Publish Docker Image to Docker Hub
 
 on:
   push:
-    branches: ['tags']
+    # Pattern matched against refs/tags
+    tags:        
+      - '**'   
 
 jobs:
   buildjar:
