@@ -80,7 +80,7 @@ public class YmlCreationService {
                                 ComposeNetwork.builder().driver("bridge")
                                         .ipam(NetworkIpam.builder()
                                                 .driver("default")
-                                                .config(List.of("- subnet: 172.27.0.0/16"))
+                                                .config(List.of("subnet: 172.27.0.0/16"))
                                                 .build())
                                         .build())
                         .build())
