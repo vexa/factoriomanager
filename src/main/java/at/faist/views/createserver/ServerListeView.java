@@ -46,6 +46,7 @@ public class ServerListeView extends VerticalLayout implements BeforeEnterObserv
         if (model.isRunning()) {
             dockerComposeService.down(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
         } else {
+            dockerComposeService.pull(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
             dockerComposeService.up(factorioInstancesService.getPathToServerInstance(model.getUser(), model.getName()));
         }
         serverGrid.setItems(getItems());

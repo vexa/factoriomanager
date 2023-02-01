@@ -12,6 +12,21 @@ import java.io.File;
 public class DockerComposeService {
     Logger logger = LoggerFactory.getLogger(DockerComposeService.class);
 
+    public void pull(String pathToDockerCompose) {
+        try {
+            File f = new File(pathToDockerCompose + File.separator + "docker-compose.yml");
+            if (f.exists()) {
+                var procResult = new ProcBuilder("docker-compose").withArgs("-f", f.getAbsolutePath(), "pull").withTimeoutMillis(120000).run();
+                var errorByte = procResult.getErrorBytes();
+                System.out.println(errorByte);
+                System.out.println("-----");
+                System.out.println(procResult.getCommandLine());
+            }
+        } catch (Exception e) {
+            logger.error("Error during up", e);
+        }
+    }
+
     public void up(String pathToDockerCompose) {
         try {
             File f = new File(pathToDockerCompose + File.separator + "docker-compose.yml");
