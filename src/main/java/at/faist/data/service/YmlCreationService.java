@@ -70,6 +70,7 @@ public class YmlCreationService {
                 .version("3.3")
                 .services(
                         ComposeServices.builder()
+                                .networks(List.of("factorioserver"))
                                 .factorio(
                                         ComposeService.builder()
                                                 .image("factoriotools/factorio:stable")
