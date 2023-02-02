@@ -5,13 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class NetworkIpam {
-    private String driver;
-    private List<Config> config;
+@NoArgsConstructor
+public class SubnetConfig implements Config {
+    private String subnet;
 }
