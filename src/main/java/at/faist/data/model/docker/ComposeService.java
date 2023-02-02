@@ -22,6 +22,7 @@ public class ComposeService {
     private List<String> ports;
     private List<String> volumes;
     private String restart = "unless-stopped";
+    private List<String> networks;
 
     public void setContainer_name(String container_name) {
         this.container_name = container_name;

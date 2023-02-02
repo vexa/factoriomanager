@@ -67,10 +67,9 @@ public class YmlCreationService {
 
     public DockerCompose getDefaultFacotriaCompose() {
         return DockerCompose.builder()
-                .version("3.3")
+                .version("3.5")
                 .services(
                         ComposeServices.builder()
-                                .networks(List.of("factorioserver"))
                                 .factorio(
                                         ComposeService.builder()
                                                 .image("factoriotools/factorio:stable")
@@ -79,6 +78,7 @@ public class YmlCreationService {
                                                 .environment(Map.of("LOAD_LATEST_SAVE", "true", "SAVE_NAME", "replace", "UPDATE_MODS_ON_START", "false"))
                                                 .ports(List.of("34197-35197:34197/udp", "27015-27115:27015/tcp"))
                                                 .volumes(List.of("/opt/factorio:/factorio"))
+                                                .networks(List.of("factorioserver"))
                                                 .build())
                                 .build())
                 .networks(ComposeNetworks.builder().def(
