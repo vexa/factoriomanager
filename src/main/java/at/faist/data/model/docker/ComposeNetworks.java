@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComposeNetworks {
-    @JsonProperty("default")
+    @JsonProperty("factorioserver")
     private ComposeNetwork def;
 }

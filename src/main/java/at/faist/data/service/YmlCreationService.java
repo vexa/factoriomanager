@@ -81,7 +81,7 @@ public class YmlCreationService {
                                                 .build())
                                 .build())
                 .networks(ComposeNetworks.builder().def(
-                                ComposeNetwork.builder().driver("bridge")
+                                ComposeNetwork.builder().driver("bridge").name("factorioserver")
                                         .ipam(NetworkIpam.builder()
                                                 .driver("default")
                                                 .config(List.of(SubnetConfig.builder().subnet("172.28.0.0/16").build()))

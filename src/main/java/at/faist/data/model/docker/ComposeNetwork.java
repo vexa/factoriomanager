@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComposeNetwork {
-
+    private String name;
     private String driver;
     private NetworkIpam ipam;
 }
