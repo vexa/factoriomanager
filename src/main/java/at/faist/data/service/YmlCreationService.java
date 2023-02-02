@@ -4,6 +4,7 @@ import at.faist.data.model.docker.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.io.FileUtils;
@@ -24,6 +25,9 @@ public class YmlCreationService {
 
     public YmlCreationService() {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Config.class, new ConfigJsonDeserializer());
+        mapper.registerModule(module);
     }
 
     public String createYml(DockerCompose dockerCompose) throws JsonProcessingException {
